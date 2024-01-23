@@ -9,10 +9,35 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 // prisma/schema.prisma
 
 model User {
-  id         Int       @id @default(autoincrement())
+  id         String    @id @default(dbgenerated()) @db.Uuid
   email      String    @unique
   name       String?
+  post       Post[]
+  comment    Comment[]
+  created_at DateTime  @default(now())
+}
+
+model Post {
+  id          String    @id @default(dbgenerated()) @db.Uuid
+  title       String
+  description String
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id     String    @db.Uuid
+  comment_ids String[]  @db.Uuid
+  created_at  DateTime  @default(now())
+  Comment     Comment[]
+}
+
+model Comment {
+  id         String   @id @default(dbgenerated()) @db.Uuid
+  comment    String
+  post       Post     @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id    String   @db.Uuid
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now())
 }
